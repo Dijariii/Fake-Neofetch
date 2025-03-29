@@ -145,7 +145,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         try:
             self.setWindowTitle("Fake Neofetch")
-            self.setMinimumSize(1200, 800)
+            self.setMinimumSize(900, 600)  # Reduced from 1200x800
             
             # Initialize components
             self.system_info = SystemInfo()
@@ -156,15 +156,15 @@ class MainWindow(QMainWindow):
             central_widget = QWidget()
             self.setCentralWidget(central_widget)
             main_layout = QHBoxLayout(central_widget)
-            main_layout.setContentsMargins(20, 20, 20, 20)
-            main_layout.setSpacing(20)
+            main_layout.setContentsMargins(10, 10, 10, 10)  # Reduced margins
+            main_layout.setSpacing(10)  # Reduced spacing
             
             # Create left panel (controls)
             left_panel = QWidget()
-            left_panel.setFixedWidth(300)  # Fixed width for better alignment
+            left_panel.setFixedWidth(250)  # Reduced from 300
             left_layout = QVBoxLayout(left_panel)
             left_layout.setContentsMargins(0, 0, 0, 0)
-            left_layout.setSpacing(15)  # Increased spacing between groups
+            left_layout.setSpacing(10)  # Reduced spacing
             
             # Create scroll area for controls
             scroll = QScrollArea()
@@ -210,10 +210,41 @@ class MainWindow(QMainWindow):
             font_layout.addWidget(QLabel("Font Size:"))
             self.font_size = QSpinBox()
             self.font_size.setRange(8, 24)
-            self.font_size.setValue(11)
+            self.font_size.setValue(10)
             font_layout.addWidget(self.font_size)
             
             controls_layout.addWidget(font_group)
+            
+            # Theme Colors
+            colors_group = QGroupBox("Theme Colors")
+            colors_layout = QGridLayout(colors_group)
+            colors_layout.setSpacing(5)
+            
+            self.color_buttons = {}
+            color_elements = [
+                ("Background", "background"),
+                ("Text", "text"),
+                ("Logo", "logo"),
+                ("Labels", "label"),
+                ("Info", "info"),
+                ("User", "user"),
+                ("Separator", "separator")
+            ]
+            
+            for i, (label_text, color_key) in enumerate(color_elements):
+                label = QLabel(label_text + ":")
+                btn = QPushButton()
+                btn.setFixedSize(30, 20)
+                btn.setCursor(Qt.CursorShape.PointingHandCursor)
+                btn.clicked.connect(lambda checked, k=color_key: self.choose_color(k))
+                
+                # Store button for later access
+                self.color_buttons[color_key] = btn
+                
+                colors_layout.addWidget(label, i, 0)
+                colors_layout.addWidget(btn, i, 1)
+            
+            controls_layout.addWidget(colors_group)
             
             # System Information
             info_group = QGroupBox("System Information")
@@ -391,9 +422,26 @@ class MainWindow(QMainWindow):
 
     def update_display(self):
         """Update the terminal display with current settings"""
-        distro = self.distro_combo.currentText()
-        logo = self.ascii_art.get_logo(distro)
-        self.terminal.update_content(logo, self.system_info.to_dict())
+        try:
+            distro = self.distro_combo.currentText()
+            logo = self.ascii_art.get_logo(distro)
+            self.terminal.update_content(logo, self.system_info.to_dict())
+            
+            # Update color buttons to match current theme
+            for color_key, btn in self.color_buttons.items():
+                color = self.terminal.theme_colors[color_key]
+                btn.setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {color};
+                        border: 1px solid #666666;
+                        border-radius: 2px;
+                    }}
+                    QPushButton:hover {{
+                        border: 1px solid #999999;
+                    }}
+                """)
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to update display: {str(e)}")
 
     def update_font(self):
         """Update the terminal font"""
@@ -416,22 +464,31 @@ class MainWindow(QMainWindow):
                 }}
             """)
 
-    def choose_color(self, color_type: str):
-        """Open color dialog to choose a new color"""
-        current_color = self.color_buttons[color_type].styleSheet().split("background-color: ")[1].split(";")[0]
-        color = QColorDialog.getColor(QColor(current_color), self)
-        if color.isValid():
-            self.color_buttons[color_type].setStyleSheet(f"""
-                QPushButton {{
-                    background-color: {color.name()};
-                    border: 1px solid #666;
-                    border-radius: 4px;
-                }}
-                QPushButton:hover {{
-                    border: 1px solid #999;
-                }}
-            """)
-            self.terminal.set_theme_colors({color_type: color.name()})
+    def choose_color(self, color_key: str):
+        """Open color picker and update theme color"""
+        try:
+            current_color = QColor(self.terminal.theme_colors[color_key])
+            color = QColorDialog.getColor(current_color, self, f"Choose {color_key} color")
+            
+            if color.isValid():
+                # Update button style
+                self.color_buttons[color_key].setStyleSheet(f"""
+                    QPushButton {{
+                        background-color: {color.name()};
+                        border: 1px solid #666666;
+                        border-radius: 2px;
+                    }}
+                    QPushButton:hover {{
+                        border: 1px solid #999999;
+                    }}
+                """)
+                
+                # Update terminal theme
+                self.terminal.theme_colors[color_key] = color.name()
+                self.terminal.apply_theme()
+                self.update_display()
+        except Exception as e:
+            QMessageBox.warning(self, "Error", f"Failed to update color: {str(e)}")
 
     def update_info(self, key: str, value: str):
         """Update system info and refresh display"""

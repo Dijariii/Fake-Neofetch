@@ -4,7 +4,7 @@
 [![PyQt6](https://img.shields.io/badge/PyQt-6.4.0%2B-green.svg)](https://pypi.org/project/PyQt6/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A modern GUI application that simulates the popular Neofetch command-line tool, allowing you to create and customize system information displays with various Linux distribution themes.
+🖥️ Modern GUI tool for creating ✨ customizable system info with 🐧 Linux themes.
 
 ![App Screenshot](screenshots/main.png)
 

@@ -117,26 +117,32 @@ class TerminalWindow(QMainWindow):
         self.terminal.set_content(content)
         
         # Style the terminal widget
-        self.terminal.setStyleSheet(f"""
-            QWidget {{
-                background-color: {theme["background"]};
+        self.terminal.setStyleSheet("""
+            QTextEdit {
+                background-color: #300A24;
+                color: #FFFFFF;
                 border: none;
-            }}
-            QScrollBar:vertical {{
+                padding: 5px;
+                font-family: 'Ubuntu Mono';
+                font-size: 10pt;
+                line-height: 120%;
+            }
+            QScrollBar:vertical {
                 border: none;
-                background: {theme["background"]};
-                width: 10px;
-                margin: 0;
-            }}
-            QScrollBar::handle:vertical {{
-                background: rgba(255, 255, 255, 0.1);
+                background: #300A24;
+                width: 8px;
+                margin: 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: rgba(255, 255, 255, 0.2);
                 min-height: 20px;
-                border-radius: 5px;
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                border-radius: 4px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                 border: none;
                 background: none;
-            }}
+                height: 0px;
+            }
         """)
         
         layout.addWidget(self.terminal)
@@ -195,7 +201,7 @@ class TerminalWidget(QWidget):
         try:
             self.is_preview = is_preview
             self.current_font_family = "Ubuntu Mono"
-            self.current_font_size = 11
+            self.current_font_size = 10
             self.current_logo = ""
             self.current_info = {}
             self.theme_colors = {
@@ -216,7 +222,7 @@ class TerminalWidget(QWidget):
     def init_ui(self):
         try:
             layout = QVBoxLayout(self)
-            layout.setContentsMargins(10, 10, 10, 10)
+            layout.setContentsMargins(5, 5, 5, 5)  # Reduced margins
             layout.setSpacing(0)
             
             # Create terminal container
@@ -245,36 +251,36 @@ class TerminalWidget(QWidget):
             char_width = metrics.horizontalAdvance('x')
             char_height = metrics.height()
             
-            # Set size for approximately 80x24 characters
-            self.terminal.setMinimumSize(char_width * 80 + 20, char_height * 24 + 20)
+            # Set size for approximately 60x20 characters (reduced from 80x24)
+            self.terminal.setMinimumSize(char_width * 60 + 20, char_height * 20 + 20)
             
             # Set terminal style
-            self.terminal.setStyleSheet(f"""
-                QTextEdit {{
-                    background-color: {self.theme_colors["background"]};
-                    color: {self.theme_colors["text"]};
+            self.terminal.setStyleSheet("""
+                QTextEdit {
+                    background-color: #300A24;
+                    color: #FFFFFF;
                     border: none;
-                    padding: 10px;
-                    font-family: '{self.current_font_family}';
-                    font-size: {self.current_font_size}pt;
-                    line-height: 1.2;
-                }}
-                QScrollBar:vertical {{
+                    padding: 5px;
+                    font-family: 'Ubuntu Mono';
+                    font-size: 10pt;
+                    line-height: 120%;
+                }
+                QScrollBar:vertical {
                     border: none;
-                    background: {self.theme_colors["background"]};
+                    background: #300A24;
                     width: 8px;
-                    margin: 0;
-                }}
-                QScrollBar::handle:vertical {{
+                    margin: 0px;
+                }
+                QScrollBar::handle:vertical {
                     background: rgba(255, 255, 255, 0.2);
                     min-height: 20px;
                     border-radius: 4px;
-                }}
-                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                }
+                QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
                     border: none;
                     background: none;
-                    height: 0;
-                }}
+                    height: 0px;
+                }
             """)
             
             container_layout.addWidget(self.terminal)
